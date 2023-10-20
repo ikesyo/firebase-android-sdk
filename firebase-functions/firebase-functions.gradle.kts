@@ -16,6 +16,7 @@ plugins {
     id("firebase-library")
     id("firebase-vendor")
     id("kotlin-android")
+    kotlin("kapt")
 }
 
 firebaseLibrary {
@@ -89,6 +90,8 @@ dependencies {
   androidTestImplementation(libs.androidx.test.junit)
   androidTestImplementation(libs.mockito.core)
   androidTestImplementation(libs.mockito.dexmaker)
+  kapt("com.google.dagger:dagger-android-processor:2.43.2")
+  kapt("com.google.dagger:dagger-compiler:2.43.2")
 }
 
 // ==========================================================================
