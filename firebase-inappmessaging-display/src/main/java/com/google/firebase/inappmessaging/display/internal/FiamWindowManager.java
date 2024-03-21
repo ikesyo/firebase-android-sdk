@@ -32,7 +32,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Class encapsulating the popup window into which we inflate the in app message. The window manager
+ * Class encapsulating the popup window into which we inflate the in app
+ * message. The window manager
  * keeps state of the binding that is currently in view
  *
  * @hide
@@ -45,7 +46,8 @@ public class FiamWindowManager {
   private BindingWrapper bindingWrapper;
 
   @Inject
-  FiamWindowManager() {}
+  FiamWindowManager() {
+  }
 
   /** Inflate the container into a new popup window */
   public void show(@NonNull final BindingWrapper bindingWrapper, @NonNull Activity activity) {
@@ -54,7 +56,8 @@ public class FiamWindowManager {
       return;
     }
 
-    if (activity.isFinishing() || activity.isDestroyed()) {
+    if (activity.isFinishing()
+        || Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed()) {
       Logging.loge("Activity is finishing or does not have valid window token. Cannot show FIAM.");
       return;
     }
@@ -72,13 +75,13 @@ public class FiamWindowManager {
     Logging.logdPair("Inset (top, bottom)", insetDimensions.top, insetDimensions.bottom);
     Logging.logdPair("Inset (left, right)", insetDimensions.left, insetDimensions.right);
 
-    // TODO: Should use WindowInsetCompat to make sure we don't overlap with the status bar
-    //       action bar or anything else. This will become more pressing as notches
-    //       become more common on Android phones.
+    // TODO: Should use WindowInsetCompat to make sure we don't overlap with the
+    // status bar
+    // action bar or anything else. This will become more pressing as notches
+    // become more common on Android phones.
 
     if (bindingWrapper.canSwipeToDismiss()) {
-      SwipeDismissTouchListener listener =
-          getSwipeListener(config, bindingWrapper, windowManager, layoutParams);
+      SwipeDismissTouchListener listener = getSwipeListener(config, bindingWrapper, windowManager, layoutParams);
       bindingWrapper.getDialogView().setOnTouchListener(listener);
     }
 
@@ -102,15 +105,15 @@ public class FiamWindowManager {
 
   private WindowManager.LayoutParams getLayoutParams(
       @NonNull InAppMessageLayoutConfig layoutConfig, @NonNull Activity activity) {
-    final WindowManager.LayoutParams layoutParams =
-        new WindowManager.LayoutParams(
-            layoutConfig.windowWidth(),
-            layoutConfig.windowHeight(),
-            DEFAULT_TYPE,
-            layoutConfig.windowFlag(),
-            PixelFormat.TRANSLUCENT);
+    final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+        layoutConfig.windowWidth(),
+        layoutConfig.windowHeight(),
+        DEFAULT_TYPE,
+        layoutConfig.windowFlag(),
+        PixelFormat.TRANSLUCENT);
 
-    // If the window gravity is TOP, we move down to avoid hitting the status bar (if shown).
+    // If the window gravity is TOP, we move down to avoid hitting the status bar
+    // (if shown).
     Rect insetDimensions = getInsetDimensions(activity);
     if ((layoutConfig.viewWindowGravity() & Gravity.TOP) == Gravity.TOP) {
       layoutParams.y = insetDimensions.top;
@@ -128,8 +131,10 @@ public class FiamWindowManager {
   }
 
   /**
-   * Get the total size of the display in pixels, with no exclusions. For example on a Pixel this
-   * would return 1920x1080 rather than the content frame which gives up 63 pixels to the status bar
+   * Get the total size of the display in pixels, with no exclusions. For example
+   * on a Pixel this
+   * would return 1920x1080 rather than the content frame which gives up 63 pixels
+   * to the status bar
    * and 126 pixels to the navigation bar.
    */
   private Point getDisplaySize(@NonNull Activity activity) {
@@ -146,11 +151,15 @@ public class FiamWindowManager {
   }
 
   /**
-   * Determine how much content should be inset on all sides in order to not overlap with system UI.
+   * Determine how much content should be inset on all sides in order to not
+   * overlap with system UI.
    *
-   * <p>Ex: Pixel in portrait top = 63 bottom = 126 left = 0 right = 0
+   * <p>
+   * Ex: Pixel in portrait top = 63 bottom = 126 left = 0 right = 0
    *
-   * <p>Ex: Pixel in landscape, nav bar on right top = 63 bottom = 0 left = 0 right = 126
+   * <p>
+   * Ex: Pixel in landscape, nav bar on right top = 63 bottom = 0 left = 0 right =
+   * 126
    */
   private Rect getInsetDimensions(@NonNull Activity activity) {
     Rect padding = new Rect();
@@ -175,7 +184,10 @@ public class FiamWindowManager {
     return visibleFrame;
   }
 
-  /** Get a swipe listener, using knowledge of the LayoutConfig to dictate the behavior. */
+  /**
+   * Get a swipe listener, using knowledge of the LayoutConfig to dictate the
+   * behavior.
+   */
   private SwipeDismissTouchListener getSwipeListener(
       InAppMessageLayoutConfig layoutConfig,
       final BindingWrapper bindingWrapper,
@@ -183,27 +195,27 @@ public class FiamWindowManager {
       final WindowManager.LayoutParams layoutParams) {
 
     // The dismiss callbacks are the same in any case.
-    SwipeDismissTouchListener.DismissCallbacks callbacks =
-        new SwipeDismissTouchListener.DismissCallbacks() {
+    SwipeDismissTouchListener.DismissCallbacks callbacks = new SwipeDismissTouchListener.DismissCallbacks() {
 
-          @Override
-          public boolean canDismiss(Object token) {
-            return true;
-          }
+      @Override
+      public boolean canDismiss(Object token) {
+        return true;
+      }
 
-          @Override
-          public void onDismiss(View view, Object token) {
-            if (bindingWrapper.getDismissListener() != null) {
-              bindingWrapper.getDismissListener().onClick(view);
-            }
-          }
-        };
+      @Override
+      public void onDismiss(View view, Object token) {
+        if (bindingWrapper.getDismissListener() != null) {
+          bindingWrapper.getDismissListener().onClick(view);
+        }
+      }
+    };
 
     if (layoutConfig.windowWidth() == ViewGroup.LayoutParams.MATCH_PARENT) {
       // When we are using the entire view width we can use the default behavior
       return new SwipeDismissTouchListener(bindingWrapper.getDialogView(), null, callbacks);
     } else {
-      // When we are not using the entire view width we need to use the WindowManager to animate.
+      // When we are not using the entire view width we need to use the WindowManager
+      // to animate.
       return new SwipeDismissTouchListener(bindingWrapper.getDialogView(), null, callbacks) {
         @Override
         protected float getTranslationX() {
